@@ -7,6 +7,8 @@ defmodule MyexpensesApiPhxWeb.Router do
 
   scope "/api", MyexpensesApiPhxWeb do
     pipe_through :api
+    post "/users/signup", UserController, :create
+    post "/users/signin", UserController, :signin
   end
 
   # Enables LiveDashboard only for development

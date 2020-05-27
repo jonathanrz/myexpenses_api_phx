@@ -29,3 +29,7 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
+
+config :myexpenses_api_phx, MyexpensesApiPhxWeb.Auth.Guardian,
+  issuer: "myexpenses_api_phx",
+  secret_key: System.get_env("MYEXPENSES_API_PHX_SECRET")
