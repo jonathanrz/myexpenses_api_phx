@@ -1,8 +1,8 @@
-defmodule MyexpensesApiPhx.Data.Place do
+defmodule MyexpensesApiPhx.Data.Category do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "places" do
+  schema "categories" do
     field :name, :string
     belongs_to(:user, MyexpensesApiPhx.AuthData.User)
 
@@ -10,8 +10,8 @@ defmodule MyexpensesApiPhx.Data.Place do
   end
 
   @doc false
-  def changeset(place, attrs) do
-    place
+  def changeset(category, attrs) do
+    category
     |> cast(attrs, [:name])
     |> validate_required([:name])
   end

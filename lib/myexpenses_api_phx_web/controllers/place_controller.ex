@@ -4,7 +4,7 @@ defmodule MyexpensesApiPhxWeb.PlaceController do
   alias MyexpensesApiPhx.Data
   alias MyexpensesApiPhx.Data.Place
 
-  plug(:check_place_owner when action not in [:index, :new, :create])
+  plug(:check_place_owner when action not in [:index, :create])
 
   action_fallback MyexpensesApiPhxWeb.FallbackController
 
