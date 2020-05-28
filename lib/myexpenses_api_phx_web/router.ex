@@ -5,10 +5,19 @@ defmodule MyexpensesApiPhxWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug MyexpensesApiPhxWeb.Auth.Pipeline
+  end
+
   scope "/api", MyexpensesApiPhxWeb do
     pipe_through :api
     post "/users/signup", UserController, :create
     post "/users/signin", UserController, :signin
+  end
+
+  scope "/api", MyexpensesApiPhxWeb do
+    pipe_through [:api, :auth]
+    resources "/places", PlaceController
   end
 
   # Enables LiveDashboard only for development
