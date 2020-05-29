@@ -2,6 +2,8 @@ defmodule MyexpensesApiPhx.Data.Account do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:id, :name, :balance]}
+
   schema "accounts" do
     field :balance, :integer
     field :name, :string
