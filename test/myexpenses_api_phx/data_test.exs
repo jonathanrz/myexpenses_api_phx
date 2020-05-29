@@ -240,4 +240,71 @@ defmodule MyexpensesApiPhx.DataTest do
       assert %Ecto.Changeset{} = Data.change_credit_card(credit_card)
     end
   end
+
+  describe "bills" do
+    alias MyexpensesApiPhx.Data.Bill
+
+    @valid_attrs %{due_day: 42, end_date: ~D[2010-04-17], init_date: ~D[2010-04-17], name: "some name", value: 42}
+    @update_attrs %{due_day: 43, end_date: ~D[2011-05-18], init_date: ~D[2011-05-18], name: "some updated name", value: 43}
+    @invalid_attrs %{due_day: nil, end_date: nil, init_date: nil, name: nil, value: nil}
+
+    def bill_fixture(attrs \\ %{}) do
+      {:ok, bill} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Data.create_bill()
+
+      bill
+    end
+
+    test "list_bills/0 returns all bills" do
+      bill = bill_fixture()
+      assert Data.list_bills() == [bill]
+    end
+
+    test "get_bill!/1 returns the bill with given id" do
+      bill = bill_fixture()
+      assert Data.get_bill!(bill.id) == bill
+    end
+
+    test "create_bill/1 with valid data creates a bill" do
+      assert {:ok, %Bill{} = bill} = Data.create_bill(@valid_attrs)
+      assert bill.due_day == 42
+      assert bill.end_date == ~D[2010-04-17]
+      assert bill.init_date == ~D[2010-04-17]
+      assert bill.name == "some name"
+      assert bill.value == 42
+    end
+
+    test "create_bill/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Data.create_bill(@invalid_attrs)
+    end
+
+    test "update_bill/2 with valid data updates the bill" do
+      bill = bill_fixture()
+      assert {:ok, %Bill{} = bill} = Data.update_bill(bill, @update_attrs)
+      assert bill.due_day == 43
+      assert bill.end_date == ~D[2011-05-18]
+      assert bill.init_date == ~D[2011-05-18]
+      assert bill.name == "some updated name"
+      assert bill.value == 43
+    end
+
+    test "update_bill/2 with invalid data returns error changeset" do
+      bill = bill_fixture()
+      assert {:error, %Ecto.Changeset{}} = Data.update_bill(bill, @invalid_attrs)
+      assert bill == Data.get_bill!(bill.id)
+    end
+
+    test "delete_bill/1 deletes the bill" do
+      bill = bill_fixture()
+      assert {:ok, %Bill{}} = Data.delete_bill(bill)
+      assert_raise Ecto.NoResultsError, fn -> Data.get_bill!(bill.id) end
+    end
+
+    test "change_bill/1 returns a bill changeset" do
+      bill = bill_fixture()
+      assert %Ecto.Changeset{} = Data.change_bill(bill)
+    end
+  end
 end

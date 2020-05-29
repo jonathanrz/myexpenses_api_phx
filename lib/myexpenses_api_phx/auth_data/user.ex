@@ -9,6 +9,7 @@ defmodule MyexpensesApiPhx.AuthData.User do
     field :password, :string, virtual: true
 
     has_many(:accounts, MyexpensesApiPhx.Data.Account)
+    has_many(:bills, MyexpensesApiPhx.Data.Bill)
     has_many(:categories, MyexpensesApiPhx.Data.Category)
     has_many(:credit_cards, MyexpensesApiPhx.Data.CreditCard)
     has_many(:places, MyexpensesApiPhx.Data.Place)
