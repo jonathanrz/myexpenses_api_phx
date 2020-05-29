@@ -8,6 +8,7 @@ defmodule MyexpensesApiPhx.AuthData.User do
     field :encrypted_password, :string
     field :password, :string, virtual: true
 
+    has_many(:accounts, MyexpensesApiPhx.Data.Account)
     has_many(:categories, MyexpensesApiPhx.Data.Category)
     has_many(:places, MyexpensesApiPhx.Data.Place)
 

@@ -17,6 +17,7 @@ defmodule MyexpensesApiPhxWeb.Router do
 
   scope "/api", MyexpensesApiPhxWeb do
     pipe_through [:api, :auth]
+    resources "/accounts", AccountController
     resources "/categories", CategoryController
     resources "/places", PlaceController
   end
