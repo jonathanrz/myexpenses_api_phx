@@ -22,6 +22,7 @@ defmodule MyexpensesApiPhxWeb.Router do
     resources "/credit_cards", CreditCardController
     resources "/categories", CategoryController
     resources "/places", PlaceController
+    resources "/receipts", ReceiptController
   end
 
   # Enables LiveDashboard only for development
