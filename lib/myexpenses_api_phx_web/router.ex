@@ -23,6 +23,8 @@ defmodule MyexpensesApiPhxWeb.Router do
     resources "/categories", CategoryController
     resources "/places", PlaceController
     resources "/receipts", ReceiptController
+    post "/receipts/:id/confirm", ReceiptController, :confirm
+    post "/receipts/:id/unconfirm", ReceiptController, :unconfirm
   end
 
   # Enables LiveDashboard only for development

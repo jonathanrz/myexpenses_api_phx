@@ -44,6 +44,26 @@ defmodule MyexpensesApiPhxWeb.ReceiptController do
     end
   end
 
+  def confirm(conn, %{"id" => id}) do
+    receipt = Financial.get_receipt!(id)
+
+    if(receipt.confirmed == false) do
+      {:ok, _receipt} = Financial.confirm_receipt(receipt)
+    end
+
+    render(conn, "show.json", receipt: Financial.get_receipt!(id))
+  end
+
+  def unconfirm(conn, %{"id" => id}) do
+    receipt = Financial.get_receipt!(id)
+
+    if(receipt.confirmed == true) do
+      {:ok, _receipt} = Financial.unconfirm_receipt(receipt)
+    end
+
+    render(conn, "show.json", receipt: Financial.get_receipt!(id))
+  end
+
   def check_receipt_owner(conn, _params) do
     %{params: %{"id" => id}} = conn
 

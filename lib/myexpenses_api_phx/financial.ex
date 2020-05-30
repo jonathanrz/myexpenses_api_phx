@@ -4,9 +4,11 @@ defmodule MyexpensesApiPhx.Financial do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Multi
   alias MyexpensesApiPhx.Repo
 
   alias MyexpensesApiPhx.Financial.Receipt
+  alias MyexpensesApiPhx.Data.Account
 
   @doc """
   Returns the list of receipts.
@@ -105,5 +107,25 @@ defmodule MyexpensesApiPhx.Financial do
   """
   def change_receipt(%Receipt{} = receipt, attrs \\ %{}) do
     Receipt.changeset(receipt, attrs)
+  end
+
+  def confirm_receipt(receipt) do
+    Multi.new()
+    |> Multi.update(
+      :account,
+      Account.changeset(receipt.account, %{balance: receipt.account.balance + receipt.value})
+    )
+    |> Multi.update(:receipt, Receipt.changeset(receipt, %{confirmed: true}))
+    |> Repo.transaction()
+  end
+
+  def unconfirm_receipt(receipt) do
+    Multi.new()
+    |> Multi.update(
+      :account,
+      Account.changeset(receipt.account, %{balance: receipt.account.balance - receipt.value})
+    )
+    |> Multi.update(:receipt, Receipt.changeset(receipt, %{confirmed: false}))
+    |> Repo.transaction()
   end
 end
