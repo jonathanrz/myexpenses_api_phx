@@ -12,6 +12,7 @@ defmodule MyexpensesApiPhx.AuthData.User do
     has_many(:bills, MyexpensesApiPhx.Data.Bill)
     has_many(:categories, MyexpensesApiPhx.Data.Category)
     has_many(:credit_cards, MyexpensesApiPhx.Data.CreditCard)
+    has_many(:expenses, MyexpensesApiPhx.Financial.Expense)
     has_many(:places, MyexpensesApiPhx.Data.Place)
     has_many(:receipts, MyexpensesApiPhx.Financial.Receipt)
 
