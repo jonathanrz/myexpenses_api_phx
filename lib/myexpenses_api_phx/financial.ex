@@ -10,6 +10,8 @@ defmodule MyexpensesApiPhx.Financial do
   alias MyexpensesApiPhx.Financial.Receipt
   alias MyexpensesApiPhx.Data.Account
 
+  require Logger
+
   @doc """
   Returns the list of receipts.
 
@@ -180,6 +182,69 @@ defmodule MyexpensesApiPhx.Financial do
     end
   end
 
+  def adjust_day_31(day) do
+    if(day > 31) do
+      31
+    else
+      day
+    end
+  end
+
+  def adjust_day_30(day) do
+    if(day > 30) do
+      30
+    else
+      day
+    end
+  end
+
+  def adjust_day_28(day) do
+    if(day > 28) do
+      28
+    else
+      day
+    end
+  end
+
+  defp adjust_day_of_month(1, day), do: adjust_day_31(day)
+  defp adjust_day_of_month(2, day), do: adjust_day_28(day)
+  defp adjust_day_of_month(3, day), do: adjust_day_31(day)
+  defp adjust_day_of_month(4, day), do: adjust_day_30(day)
+  defp adjust_day_of_month(5, day), do: adjust_day_31(day)
+  defp adjust_day_of_month(6, day), do: adjust_day_30(day)
+  defp adjust_day_of_month(7, day), do: adjust_day_31(day)
+  defp adjust_day_of_month(8, day), do: adjust_day_31(day)
+  defp adjust_day_of_month(9, day), do: adjust_day_30(day)
+  defp adjust_day_of_month(10, day), do: adjust_day_31(day)
+  defp adjust_day_of_month(11, day), do: adjust_day_30(day)
+  defp adjust_day_of_month(12, day), do: adjust_day_31(day)
+
+  defp add_one_month_to_naive_date_time(date) do
+    month = date.month
+
+    Logger.debug("newDate: #{inspect(month)}")
+
+    if(month == 12) do
+      NaiveDateTime.new(
+        date.year + 1,
+        1,
+        adjust_day_of_month(1, date.day),
+        date.hour,
+        date.minute,
+        date.second
+      )
+    else
+      NaiveDateTime.new(
+        date.year,
+        month + 1,
+        adjust_day_of_month(date.month, date.day),
+        date.hour,
+        date.minute,
+        date.second
+      )
+    end
+  end
+
   defp create_installment_expense(multi, attrs, user, uuid, installment, date, split_value) do
     changeset =
       user
@@ -194,16 +259,18 @@ defmodule MyexpensesApiPhx.Financial do
       )
 
     %{"installmentNumber" => installmentNumber} = attrs
-    {installmentCount, _} = Integer.parse(installmentNumber)
+    # {installmentCount, _} = Integer.parse(installmentNumber)
 
-    if(installment < installmentCount) do
+    Logger.debug("newDate: #{inspect(add_one_month_to_naive_date_time(date))}")
+
+    if(installment < installmentNumber) do
       create_installment_expense(
         Multi.insert(multi, String.to_atom("expense#{installment}"), changeset),
         attrs,
         user,
         uuid,
         installment + 1,
-        Date.add(date, Date.days_in_month(date)),
+        add_one_month_to_naive_date_time(date),
         split_value
       )
     else
@@ -227,9 +294,12 @@ defmodule MyexpensesApiPhx.Financial do
     %{"installmentNumber" => installmentNumber, "date" => date, "value" => value} = attrs
 
     if(installmentNumber) do
-      {installmentCount, _} = Integer.parse(installmentNumber)
-      {_, parsedDate} = Date.from_iso8601(date)
-      {parsedValue, _} = Integer.parse(value)
+      # {installmentCount, _} = Integer.parse(installmentNumber)
+      {_, parsedDate} = NaiveDateTime.from_iso8601(date)
+      # {parsedValue, _} = Integer.parse(value)
+
+      Logger.debug("date: #{inspect(date)}")
+      Logger.debug("parsedDate: #{inspect(parsedDate)}")
 
       {result, expenses} =
         Repo.transaction(
@@ -240,7 +310,7 @@ defmodule MyexpensesApiPhx.Financial do
             Ecto.UUID.generate(),
             1,
             parsedDate,
-            div(parsedValue, installmentCount)
+            div(value, installmentNumber)
           )
         )
 

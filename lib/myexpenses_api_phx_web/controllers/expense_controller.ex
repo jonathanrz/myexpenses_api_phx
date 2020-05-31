@@ -19,7 +19,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.expense_path(conn, :show, expense))
-      |> render("show.json", expense: expense)
+      |> render("show.json", expense: Financial.get_expense!(expense.id))
     end
   end
 

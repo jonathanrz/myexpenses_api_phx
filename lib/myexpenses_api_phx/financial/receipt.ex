@@ -20,5 +20,6 @@ defmodule MyexpensesApiPhx.Financial.Receipt do
     receipt
     |> cast(attrs, [:name, :confirmed, :date, :value, :account_id])
     |> validate_required([:name, :confirmed, :date, :value, :account_id])
+    |> assoc_constraint(:account)
   end
 end
