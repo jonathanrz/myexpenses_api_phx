@@ -47,13 +47,21 @@ defmodule MyexpensesApiPhxWeb.AccountController do
   def check_account_owner(conn, _params) do
     %{params: %{"id" => id}} = conn
 
-    if Data.get_account!(id).user_id == Guardian.Plug.current_resource(conn).id do
-      conn
-    else
-      conn
-      |> put_resp_content_type("application/json")
-      |> send_resp(403, Jason.encode!(%{error: "You cannot access this account"}))
-      |> halt()
+    try do
+      if Data.get_account!(id).user_id == Guardian.Plug.current_resource(conn).id do
+        conn
+      else
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(403, Jason.encode!(%{error: "You cannot access this account"}))
+        |> halt()
+      end
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(404, Jason.encode!(%{error: "Account not found"}))
+        |> halt()
     end
   end
 end
