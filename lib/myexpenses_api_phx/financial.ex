@@ -10,6 +10,9 @@ defmodule MyexpensesApiPhx.Financial do
   alias MyexpensesApiPhx.Financial.Receipt
   alias MyexpensesApiPhx.Data.Account
 
+  require Logger
+  require Timex
+
   @doc """
   Returns the list of receipts.
 
@@ -181,29 +184,31 @@ defmodule MyexpensesApiPhx.Financial do
   end
 
   defp create_installment_expense(multi, attrs, user, uuid, installment, date, split_value) do
+    Logger.debug("newDate: #{inspect(date)}")
+
     changeset =
       user
       |> Ecto.build_assoc(:expenses)
       |> Expense.changeset(
         Map.merge(attrs, %{
           "installmentUUID" => uuid,
-          "installmentNumber" => installment,
+          "installmentNumber" => Integer.to_string(installment),
           "value" => split_value,
           "date" => date
         })
       )
 
     %{"installmentNumber" => installmentNumber} = attrs
-    {installmentCount, _} = Integer.parse(installmentNumber)
+    # {installmentCount, _} = Integer.parse(installmentNumber)
 
-    if(installment < installmentCount) do
+    if(installment < installmentNumber) do
       create_installment_expense(
         Multi.insert(multi, String.to_atom("expense#{installment}"), changeset),
         attrs,
         user,
         uuid,
         installment + 1,
-        Date.add(date, Date.days_in_month(date)),
+        Timex.shift(date, months: 1),
         split_value
       )
     else
@@ -227,9 +232,12 @@ defmodule MyexpensesApiPhx.Financial do
     %{"installmentNumber" => installmentNumber, "date" => date, "value" => value} = attrs
 
     if(installmentNumber) do
-      {installmentCount, _} = Integer.parse(installmentNumber)
-      {_, parsedDate} = Date.from_iso8601(date)
-      {parsedValue, _} = Integer.parse(value)
+      # {installmentCount, _} = Integer.parse(installmentNumber)
+      {_, parsedDate} = NaiveDateTime.from_iso8601(date)
+      # {parsedValue, _} = Integer.parse(value)
+
+      Logger.debug("date: #{inspect(date)}")
+      Logger.debug("parsedDate: #{inspect(parsedDate)}")
 
       {result, expenses} =
         Repo.transaction(
@@ -240,7 +248,7 @@ defmodule MyexpensesApiPhx.Financial do
             Ecto.UUID.generate(),
             1,
             parsedDate,
-            div(parsedValue, installmentCount)
+            div(value, installmentNumber)
           )
         )
 

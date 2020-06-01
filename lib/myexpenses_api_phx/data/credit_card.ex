@@ -17,5 +17,6 @@ defmodule MyexpensesApiPhx.Data.CreditCard do
     credit_card
     |> cast(attrs, [:name, :account_id])
     |> validate_required([:name, :account_id])
+    |> assoc_constraint(:account)
   end
 end

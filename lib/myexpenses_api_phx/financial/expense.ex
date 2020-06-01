@@ -27,10 +27,10 @@ defmodule MyexpensesApiPhx.Financial.Expense do
     field :value, :integer
 
     belongs_to(:account, MyexpensesApiPhx.Data.Account)
-    belongs_to(:credit_card, MyexpensesApiPhx.Data.CreditCard)
-    belongs_to(:place, MyexpensesApiPhx.Data.Place)
     belongs_to(:bill, MyexpensesApiPhx.Data.Bill)
     belongs_to(:category, MyexpensesApiPhx.Data.Category)
+    belongs_to(:credit_card, MyexpensesApiPhx.Data.CreditCard)
+    belongs_to(:place, MyexpensesApiPhx.Data.Place)
     belongs_to(:user, MyexpensesApiPhx.AuthData.User)
 
     timestamps()
@@ -53,5 +53,10 @@ defmodule MyexpensesApiPhx.Financial.Expense do
       :category_id
     ])
     |> validate_required([:name, :date, :value])
+    |> assoc_constraint(:account)
+    |> assoc_constraint(:bill)
+    |> assoc_constraint(:category)
+    |> assoc_constraint(:credit_card)
+    |> assoc_constraint(:place)
   end
 end
