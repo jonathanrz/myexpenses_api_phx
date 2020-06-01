@@ -22,6 +22,7 @@ defmodule MyexpensesApiPhxWeb.CategoryControllerTest do
   end
 
   describe "index" do
+    @tag :skip
     test "lists all categories", %{conn: conn} do
       conn = get(conn, Routes.category_path(conn, :index))
       assert json_response(conn, 200)["data"] == []
@@ -29,6 +30,7 @@ defmodule MyexpensesApiPhxWeb.CategoryControllerTest do
   end
 
   describe "create category" do
+    @tag :skip
     test "renders category when data is valid", %{conn: conn} do
       conn = post(conn, Routes.category_path(conn, :create), category: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
@@ -41,6 +43,7 @@ defmodule MyexpensesApiPhxWeb.CategoryControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    @tag :skip
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.category_path(conn, :create), category: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
@@ -50,7 +53,11 @@ defmodule MyexpensesApiPhxWeb.CategoryControllerTest do
   describe "update category" do
     setup [:create_category]
 
-    test "renders category when data is valid", %{conn: conn, category: %Category{id: id} = category} do
+    @tag :skip
+    test "renders category when data is valid", %{
+      conn: conn,
+      category: %Category{id: id} = category
+    } do
       conn = put(conn, Routes.category_path(conn, :update, category), category: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
@@ -62,6 +69,7 @@ defmodule MyexpensesApiPhxWeb.CategoryControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    @tag :skip
     test "renders errors when data is invalid", %{conn: conn, category: category} do
       conn = put(conn, Routes.category_path(conn, :update, category), category: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
@@ -71,6 +79,7 @@ defmodule MyexpensesApiPhxWeb.CategoryControllerTest do
   describe "delete category" do
     setup [:create_category]
 
+    @tag :skip
     test "deletes chosen category", %{conn: conn, category: category} do
       conn = delete(conn, Routes.category_path(conn, :delete, category))
       assert response(conn, 204)

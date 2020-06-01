@@ -20,7 +20,14 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
     name: "some updated name",
     value: 43
   }
-  @invalid_attrs %{confirmed: nil, date: nil, installmentNumber: nil, installmentUUID: nil, name: nil, value: nil}
+  @invalid_attrs %{
+    confirmed: nil,
+    date: nil,
+    installmentNumber: nil,
+    installmentUUID: nil,
+    name: nil,
+    value: nil
+  }
 
   def fixture(:expense) do
     {:ok, expense} = Financial.create_expense(@create_attrs)
@@ -32,6 +39,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
   end
 
   describe "index" do
+    @tag :skip
     test "lists all expenses", %{conn: conn} do
       conn = get(conn, Routes.expense_path(conn, :index))
       assert json_response(conn, 200)["data"] == []
@@ -39,6 +47,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
   end
 
   describe "create expense" do
+    @tag :skip
     test "renders expense when data is valid", %{conn: conn} do
       conn = post(conn, Routes.expense_path(conn, :create), expense: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
@@ -56,6 +65,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    @tag :skip
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.expense_path(conn, :create), expense: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
@@ -65,6 +75,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
   describe "update expense" do
     setup [:create_expense]
 
+    @tag :skip
     test "renders expense when data is valid", %{conn: conn, expense: %Expense{id: id} = expense} do
       conn = put(conn, Routes.expense_path(conn, :update, expense), expense: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
@@ -82,6 +93,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    @tag :skip
     test "renders errors when data is invalid", %{conn: conn, expense: expense} do
       conn = put(conn, Routes.expense_path(conn, :update, expense), expense: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
@@ -91,6 +103,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseControllerTest do
   describe "delete expense" do
     setup [:create_expense]
 
+    @tag :skip
     test "deletes chosen expense", %{conn: conn, expense: expense} do
       conn = delete(conn, Routes.expense_path(conn, :delete, expense))
       assert response(conn, 204)

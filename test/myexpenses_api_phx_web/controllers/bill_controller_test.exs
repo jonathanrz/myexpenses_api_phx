@@ -30,6 +30,7 @@ defmodule MyexpensesApiPhxWeb.BillControllerTest do
   end
 
   describe "index" do
+    @tag :skip
     test "lists all bills", %{conn: conn} do
       conn = get(conn, Routes.bill_path(conn, :index))
       assert json_response(conn, 200)["data"] == []
@@ -37,6 +38,7 @@ defmodule MyexpensesApiPhxWeb.BillControllerTest do
   end
 
   describe "create bill" do
+    @tag :skip
     test "renders bill when data is valid", %{conn: conn} do
       conn = post(conn, Routes.bill_path(conn, :create), bill: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
@@ -53,6 +55,7 @@ defmodule MyexpensesApiPhxWeb.BillControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    @tag :skip
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, Routes.bill_path(conn, :create), bill: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
@@ -62,6 +65,7 @@ defmodule MyexpensesApiPhxWeb.BillControllerTest do
   describe "update bill" do
     setup [:create_bill]
 
+    @tag :skip
     test "renders bill when data is valid", %{conn: conn, bill: %Bill{id: id} = bill} do
       conn = put(conn, Routes.bill_path(conn, :update, bill), bill: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
@@ -78,6 +82,7 @@ defmodule MyexpensesApiPhxWeb.BillControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    @tag :skip
     test "renders errors when data is invalid", %{conn: conn, bill: bill} do
       conn = put(conn, Routes.bill_path(conn, :update, bill), bill: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
@@ -87,6 +92,7 @@ defmodule MyexpensesApiPhxWeb.BillControllerTest do
   describe "delete bill" do
     setup [:create_bill]
 
+    @tag :skip
     test "deletes chosen bill", %{conn: conn, bill: bill} do
       conn = delete(conn, Routes.bill_path(conn, :delete, bill))
       assert response(conn, 204)
