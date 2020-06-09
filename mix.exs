@@ -46,7 +46,8 @@ defmodule MyexpensesApiPhx.MixProject do
       {:guardian, "~> 1.0"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.0"},
-      {:timex, "~> 3.5"}
+      {:timex, "~> 3.5"},
+      {:cors_plug, "~> 2.0"}
     ]
   end
 
