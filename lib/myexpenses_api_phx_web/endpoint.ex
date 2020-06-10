@@ -52,8 +52,8 @@ defmodule MyexpensesApiPhxWeb.Endpoint do
   plug CORSPlug,
     origin: [
       "http://localhost:3000",
-      "http://myexpenses-ts-stg.netlify.app",
-      "http://myexpenses-ts-prd.netlify.app"
+      "https://myexpenses-ts-stg.netlify.app",
+      "https://myexpenses-ts-prd.netlify.app"
     ]
 
   plug MyexpensesApiPhxWeb.Router
