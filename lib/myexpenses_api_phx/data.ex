@@ -345,10 +345,16 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def create_credit_card(attrs \\ %{}, user) do
-    user
-    |> Ecto.build_assoc(:credit_cards)
-    |> CreditCard.changeset(attrs)
-    |> Repo.insert()
+    result =
+      user
+      |> Ecto.build_assoc(:credit_cards)
+      |> CreditCard.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, credit_card} -> {:ok, get_credit_card!(credit_card.id)}
+      _ -> result
+    end
   end
 
   @doc """

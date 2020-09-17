@@ -10,7 +10,6 @@ defmodule MyexpensesApiPhx.Financial do
   alias MyexpensesApiPhx.Financial.Receipt
   alias MyexpensesApiPhx.Data.Account
 
-  require Logger
   require Timex
 
   @doc """
@@ -59,10 +58,16 @@ defmodule MyexpensesApiPhx.Financial do
 
   """
   def create_receipt(attrs \\ %{}, user) do
-    user
-    |> Ecto.build_assoc(:receipts)
-    |> Receipt.changeset(attrs)
-    |> Repo.insert()
+    result =
+      user
+      |> Ecto.build_assoc(:receipts)
+      |> Receipt.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, receipt} -> {:ok, get_receipt!(receipt.id)}
+      _ -> result
+    end
   end
 
   @doc """
@@ -184,8 +189,6 @@ defmodule MyexpensesApiPhx.Financial do
   end
 
   defp create_installment_expense(multi, attrs, user, uuid, installment, date, split_value) do
-    Logger.debug("newDate: #{inspect(date)}")
-
     changeset =
       user
       |> Ecto.build_assoc(:expenses)
@@ -232,12 +235,7 @@ defmodule MyexpensesApiPhx.Financial do
     %{"installmentNumber" => installmentNumber, "date" => date, "value" => value} = attrs
 
     if(installmentNumber) do
-      # {installmentCount, _} = Integer.parse(installmentNumber)
       {_, parsedDate} = NaiveDateTime.from_iso8601(date)
-      # {parsedValue, _} = Integer.parse(value)
-
-      Logger.debug("date: #{inspect(date)}")
-      Logger.debug("parsedDate: #{inspect(parsedDate)}")
 
       {result, expenses} =
         Repo.transaction(
