@@ -252,10 +252,16 @@ defmodule MyexpensesApiPhx.Financial do
 
       {result, expenses.expense1}
     else
-      user
-      |> Ecto.build_assoc(:expenses)
-      |> Expense.changeset(attrs)
-      |> Repo.insert()
+      result =
+        user
+        |> Ecto.build_assoc(:expenses)
+        |> Expense.changeset(attrs)
+        |> Repo.insert()
+
+      case result do
+        {:ok, expense} -> {:ok, get_expense!(expense.id)}
+        _ -> result
+      end
     end
   end
 
