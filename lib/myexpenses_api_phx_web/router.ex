@@ -22,6 +22,8 @@ defmodule MyexpensesApiPhxWeb.Router do
     resources "/credit_cards", CreditCardController
     resources "/categories", CategoryController
     resources "/expenses", ExpenseController
+    post "/expenses/:id/confirm", ExpenseController, :confirm
+    post "/expenses/:id/unconfirm", ExpenseController, :unconfirm
     resources "/places", PlaceController
     resources "/receipts", ReceiptController
     post "/receipts/:id/confirm", ReceiptController, :confirm

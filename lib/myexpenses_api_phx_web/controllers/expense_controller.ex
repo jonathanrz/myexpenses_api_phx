@@ -44,6 +44,26 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
     end
   end
 
+  def confirm(conn, %{"id" => id}) do
+    expense = Financial.get_expense!(id)
+
+    if(expense.confirmed == false) do
+      {:ok, _expense} = Financial.confirm_expense(expense)
+    end
+
+    render(conn, "show.json", expense: Financial.get_expense!(id))
+  end
+
+  def unconfirm(conn, %{"id" => id}) do
+    expense = Financial.get_expense!(id)
+
+    if(expense.confirmed == true) do
+      {:ok, _expense} = Financial.unconfirm_expense(expense)
+    end
+
+    render(conn, "show.json", expense: Financial.get_expense!(id))
+  end
+
   def check_expense_owner(conn, _params) do
     %{params: %{"id" => id}} = conn
 
