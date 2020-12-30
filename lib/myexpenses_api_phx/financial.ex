@@ -21,8 +21,11 @@ defmodule MyexpensesApiPhx.Financial do
       [%Receipt{}, ...]
 
   """
-  def list_receipts(user) do
-    Repo.all(Ecto.assoc(user, :receipts))
+  def list_receipts(user, init_date, end_date) do
+    Ecto.assoc(user, :receipts)
+    |> filter_by_init_date(init_date)
+    |> filter_by_end_date(end_date)
+    |> Repo.all()
     |> Repo.preload(:account)
   end
 

@@ -8,8 +8,8 @@ defmodule MyexpensesApiPhxWeb.ReceiptController do
 
   action_fallback MyexpensesApiPhxWeb.FallbackController
 
-  def index(conn, _params) do
-    receipts = Financial.list_receipts(Guardian.Plug.current_resource(conn))
+  def index(conn, %{"init_date" => init_date, "end_date" => end_date}) do
+    receipts = Financial.list_receipts(Guardian.Plug.current_resource(conn), init_date, end_date)
     render(conn, "index.json", receipts: receipts)
   end
 
