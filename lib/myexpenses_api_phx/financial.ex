@@ -148,8 +148,11 @@ defmodule MyexpensesApiPhx.Financial do
       [%Expense{}, ...]
 
   """
-  def list_expenses(user) do
-    Repo.all(Ecto.assoc(user, :expenses))
+  def list_expenses(user, init_date, end_date) do
+    Ecto.assoc(user, :expenses)
+    |> filter_by_init_date(init_date)
+    |> filter_by_end_date(end_date)
+    |> Repo.all()
     |> Repo.preload([:account, :place, :bill, :category, :user, credit_card: [:account]])
     |> Enum.map(fn expense ->
       Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
@@ -330,5 +333,15 @@ defmodule MyexpensesApiPhx.Financial do
     )
     |> Multi.update(:expense, Expense.changeset(expense, %{confirmed: false}))
     |> Repo.transaction()
+  end
+
+  defp filter_by_init_date(query, init_date) do
+    from e in query,
+      where: e.date >= ^init_date
+  end
+
+  defp filter_by_end_date(query, end_date) do
+    from e in query,
+      where: e.date <= ^end_date
   end
 end
