@@ -504,7 +504,11 @@ defmodule MyexpensesApiPhx.Data do
   end
 
   defp filter_by_month(query, month) do
-    from e in query,
-      where: e.init_date <= ^month and e.end_date >= ^month
+    if(is_nil(month)) do
+      query
+    else
+      from e in query,
+        where: e.init_date <= ^month and e.end_date >= ^month
+    end
   end
 end
