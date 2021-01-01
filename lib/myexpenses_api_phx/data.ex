@@ -415,8 +415,10 @@ defmodule MyexpensesApiPhx.Data do
       [%Bill{}, ...]
 
   """
-  def list_bills(user) do
-    Repo.all(Ecto.assoc(user, :bills))
+  def list_bills(user, month) do
+    Ecto.assoc(user, :bills)
+    |> filter_by_month(month)
+    |> Repo.all()
   end
 
   @doc """
@@ -499,5 +501,10 @@ defmodule MyexpensesApiPhx.Data do
   """
   def change_bill(%Bill{} = bill, attrs \\ %{}) do
     Bill.changeset(bill, attrs)
+  end
+
+  defp filter_by_month(query, month) do
+    from e in query,
+      where: e.init_date <= ^month and e.end_date >= ^month
   end
 end

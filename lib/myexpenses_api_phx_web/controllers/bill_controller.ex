@@ -8,8 +8,8 @@ defmodule MyexpensesApiPhxWeb.BillController do
 
   action_fallback MyexpensesApiPhxWeb.FallbackController
 
-  def index(conn, _params) do
-    bills = Data.list_bills(Guardian.Plug.current_resource(conn))
+  def index(conn, %{"month" => month}) do
+    bills = Data.list_bills(Guardian.Plug.current_resource(conn), month)
     render(conn, "index.json", bills: bills)
   end
 
