@@ -11,6 +11,7 @@ defmodule MyexpensesApiPhx.Financial do
   alias MyexpensesApiPhx.Data.Account
 
   require Timex
+  require Logger
 
   @doc """
   Returns the list of receipts.
@@ -162,6 +163,17 @@ defmodule MyexpensesApiPhx.Financial do
     end)
   end
 
+  def month_expenses(user, month) do
+    with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
+      Ecto.assoc(user, :expenses)
+      |> filter_by_init_date(Timex.beginning_of_month(date))
+      |> filter_by_end_date(Timex.end_of_month(date))
+      |> filter_by_only_with_account()
+      |> Repo.all()
+      |> Repo.preload([:account, :place, :bill, :category, :user, credit_card: [:account]])
+    end
+  end
+
   defp load_installment_count(nil), do: 0
 
   defp load_installment_count(installmentUUID) do
@@ -208,7 +220,6 @@ defmodule MyexpensesApiPhx.Financial do
       )
 
     %{"installmentNumber" => installmentNumber} = attrs
-    # {installmentCount, _} = Integer.parse(installmentNumber)
 
     if(installment < installmentNumber) do
       create_installment_expense(
@@ -346,5 +357,10 @@ defmodule MyexpensesApiPhx.Financial do
   defp filter_by_end_date(query, end_date) do
     from e in query,
       where: e.date <= ^end_date
+  end
+
+  defp filter_by_only_with_account(query) do
+    from e in query,
+      where: e.account_id != 0
   end
 end
