@@ -12,7 +12,6 @@ defmodule MyexpensesApiPhx.Financial do
 
   require MyexpensesApiPhx.Data
   require Timex
-  require Logger
 
   @doc """
   Returns the list of receipts.
@@ -186,7 +185,7 @@ defmodule MyexpensesApiPhx.Financial do
 
         %Expense{
           id: credit_card.id,
-          name: "bill",
+          name: "invoice",
           credit_card: credit_card,
           date: date,
           user: user,
@@ -200,8 +199,6 @@ defmodule MyexpensesApiPhx.Financial do
           place: nil,
         }
       end)
-
-      Logger.debug "credit_card_bills: #{inspect(credit_card_bills)}"
 
       Enum.concat(account_expenses, credit_card_bills)
     end
