@@ -10,7 +10,9 @@ defmodule MyexpensesApiPhx.Financial do
   alias MyexpensesApiPhx.Financial.Receipt
   alias MyexpensesApiPhx.Data.Account
 
+  require MyexpensesApiPhx.Data
   require Timex
+  require Logger
 
   @doc """
   Returns the list of receipts.
@@ -162,6 +164,49 @@ defmodule MyexpensesApiPhx.Financial do
     end)
   end
 
+  def month_expenses(user, month) do
+    with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
+      account_expenses = Ecto.assoc(user, :expenses)
+      |> filter_by_init_date(Timex.beginning_of_month(date))
+      |> filter_by_end_date(Timex.end_of_month(date))
+      |> filter_by_only_with_account()
+      |> Repo.all()
+      |> Repo.preload([:account, :place, :bill, :category, :user, credit_card: [:account]])
+
+      credit_card_month = Timex.shift(date, months: -1)
+
+      credit_card_bills = MyexpensesApiPhx.Data.list_credit_cards(user)
+      |> Enum.map(fn credit_card ->
+        credit_card_expenses = Ecto.assoc(user, :expenses)
+        |> filter_by_init_date(Timex.beginning_of_month(credit_card_month))
+        |> filter_by_end_date(Timex.end_of_month(credit_card_month))
+        |> filter_by_credit_card(credit_card)
+        |> filter_by_unconfirmed()
+        |> Repo.all()
+
+        %Expense{
+          id: credit_card.id,
+          name: "bill",
+          credit_card: credit_card,
+          date: date,
+          user: user,
+          value: credit_card_expenses
+          |> Enum.map(fn expense -> expense.value end)
+          |> Enum.sum(),
+
+          account: nil,
+          bill: nil,
+          category: nil,
+          place: nil,
+        }
+      end)
+
+      Logger.debug "credit_card_bills: #{inspect(credit_card_bills)}"
+
+      Enum.concat(account_expenses, credit_card_bills)
+    end
+  end
+
   defp load_installment_count(nil), do: 0
 
   defp load_installment_count(installmentUUID) do
@@ -208,7 +253,6 @@ defmodule MyexpensesApiPhx.Financial do
       )
 
     %{"installmentNumber" => installmentNumber} = attrs
-    # {installmentCount, _} = Integer.parse(installmentNumber)
 
     if(installment < installmentNumber) do
       create_installment_expense(
@@ -346,5 +390,20 @@ defmodule MyexpensesApiPhx.Financial do
   defp filter_by_end_date(query, end_date) do
     from e in query,
       where: e.date <= ^end_date
+  end
+
+  defp filter_by_only_with_account(query) do
+    from e in query,
+      where: e.account_id != 0
+  end
+
+  defp filter_by_credit_card(query, credit_card) do
+    from e in query,
+      where: e.credit_card_id == ^credit_card.id
+  end
+
+  defp filter_by_unconfirmed(query) do
+    from e in query,
+      where: e.confirmed == false
   end
 end
