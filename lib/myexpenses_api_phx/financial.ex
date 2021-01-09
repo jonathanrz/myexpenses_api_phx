@@ -163,6 +163,14 @@ defmodule MyexpensesApiPhx.Financial do
     end)
   end
 
+  def bill_expense(user, bill, date) do
+    Ecto.assoc(user, :expenses)
+      |> filter_by_init_date(Timex.beginning_of_month(date))
+      |> filter_by_end_date(Timex.end_of_month(date))
+      |> filter_by_bill(bill)
+      |> Repo.one()
+  end
+
   def month_expenses(user, month) do
     with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
       account_expenses = Ecto.assoc(user, :expenses)
@@ -392,6 +400,11 @@ defmodule MyexpensesApiPhx.Financial do
   defp filter_by_only_with_account(query) do
     from e in query,
       where: e.account_id != 0
+  end
+
+  defp filter_by_bill(query, bill) do
+    from e in query,
+      where: e.bill_id == ^bill.id
   end
 
   defp filter_by_credit_card(query, credit_card) do

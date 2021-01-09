@@ -7,6 +7,7 @@ defmodule MyexpensesApiPhx.Data do
   alias MyexpensesApiPhx.Repo
 
   alias MyexpensesApiPhx.Data.Place
+  alias MyexpensesApiPhx.Financial
 
   @doc """
   Returns the list of places.
@@ -419,6 +420,16 @@ defmodule MyexpensesApiPhx.Data do
     Ecto.assoc(user, :bills)
     |> filter_by_month(month)
     |> Repo.all()
+  end
+
+  def month_bills(user, month) do
+    with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
+      bills = Ecto.assoc(user, :bills)
+      |> filter_by_month(date)
+      |> Repo.all()
+
+      Enum.filter(bills, fn(bill) -> Financial.bill_expense(user, bill, date) == nil end)
+    end
   end
 
   @doc """

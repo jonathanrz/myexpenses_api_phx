@@ -4,12 +4,17 @@ defmodule MyexpensesApiPhxWeb.BillController do
   alias MyexpensesApiPhx.Data
   alias MyexpensesApiPhx.Data.Bill
 
-  plug(:check_bill_owner when action not in [:index, :create])
+  plug(:check_bill_owner when action not in [:index, :month, :create])
 
   action_fallback MyexpensesApiPhxWeb.FallbackController
 
   def index(conn, params) do
     bills = Data.list_bills(Guardian.Plug.current_resource(conn), params["month"])
+    render(conn, "index.json", bills: bills)
+  end
+
+  def month(conn, params) do
+    bills = Data.month_bills(Guardian.Plug.current_resource(conn), params["month"])
     render(conn, "index.json", bills: bills)
   end
 
