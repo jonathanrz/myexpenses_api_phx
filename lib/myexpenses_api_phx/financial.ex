@@ -178,7 +178,7 @@ defmodule MyexpensesApiPhx.Financial do
       |> filter_by_end_date(Timex.end_of_month(date))
       |> filter_by_only_with_account()
       |> Repo.all()
-      |> Repo.preload([:account, :place, :bill, :category, :user, credit_card: [:account]])
+      |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account]])
 
       credit_card_month = Timex.shift(date, months: -1)
 
