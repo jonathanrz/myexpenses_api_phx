@@ -417,10 +417,18 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def list_bills(user, month) do
-    Ecto.assoc(user, :bills)
-    |> filter_by_month(month)
-    |> Repo.all()
-    |> Repo.preload(:account)
+    if(is_nil(month)) do
+      Ecto.assoc(user, :bills)
+        |> Repo.all()
+        |> Repo.preload(:account)
+    else
+      with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}-{D}") do
+        Ecto.assoc(user, :bills)
+        |> filter_by_month(date)
+        |> Repo.all()
+        |> Repo.preload(:account)
+      end
+    end
   end
 
   def month_bills(user, month) do
@@ -465,11 +473,18 @@ defmodule MyexpensesApiPhx.Data do
       {:error, %Ecto.Changeset{}}
 
   """
+
   def create_bill(attrs \\ %{}, user) do
-    user
-    |> Ecto.build_assoc(:bills)
-    |> Bill.changeset(attrs)
-    |> Repo.insert()
+    result =
+      user
+      |> Ecto.build_assoc(:bills)
+      |> Bill.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, bill} -> {:ok, get_bill!(bill.id)}
+      _ -> result
+    end
   end
 
   @doc """
@@ -524,7 +539,7 @@ defmodule MyexpensesApiPhx.Data do
       query
     else
       from e in query,
-        where: e.init_date <= ^month and e.end_date >= ^month
+        where: e.init_date <= ^Timex.end_of_month(month) and e.end_date >= ^Timex.beginning_of_month(month)
     end
   end
 end
