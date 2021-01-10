@@ -157,7 +157,7 @@ defmodule MyexpensesApiPhx.Financial do
     |> filter_by_init_date(init_date)
     |> filter_by_end_date(end_date)
     |> Repo.all()
-    |> Repo.preload([:account, :place, :bill, :category, :user, credit_card: [:account]])
+    |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account]])
     |> Enum.map(fn expense ->
       Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
     end)
@@ -235,7 +235,7 @@ defmodule MyexpensesApiPhx.Financial do
   def get_expense!(id) do
     expense =
       Repo.get!(Expense, id)
-      |> Repo.preload([:account, :place, :bill, :category, :user, credit_card: [:account]])
+      |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account]])
 
     if(expense.installmentUUID) do
       Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))

@@ -420,6 +420,7 @@ defmodule MyexpensesApiPhx.Data do
     Ecto.assoc(user, :bills)
     |> filter_by_month(month)
     |> Repo.all()
+    |> Repo.preload(:account)
   end
 
   def month_bills(user, month) do
@@ -427,6 +428,7 @@ defmodule MyexpensesApiPhx.Data do
       bills = Ecto.assoc(user, :bills)
       |> filter_by_month(date)
       |> Repo.all()
+      |> Repo.preload(:account)
 
       Enum.filter(bills, fn(bill) -> Financial.bill_expense(user, bill, date) == nil end)
     end
@@ -446,7 +448,10 @@ defmodule MyexpensesApiPhx.Data do
       ** (Ecto.NoResultsError)
 
   """
-  def get_bill!(id), do: Repo.get!(Bill, id)
+  def get_bill!(id) do
+    Repo.get!(Bill, id)
+    |> Repo.preload(:account)
+  end
 
   @doc """
   Creates a bill.

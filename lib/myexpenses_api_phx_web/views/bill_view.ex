@@ -16,6 +16,7 @@ defmodule MyexpensesApiPhxWeb.BillView do
       due_day: bill.due_day,
       init_date: bill.init_date,
       end_date: bill.end_date,
-      value: bill.value}
+      value: bill.value,
+      account: bill.account}
   end
 end
