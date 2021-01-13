@@ -420,13 +420,13 @@ defmodule MyexpensesApiPhx.Data do
     if(is_nil(month)) do
       Ecto.assoc(user, :bills)
         |> Repo.all()
-        |> Repo.preload(:account)
+        |> Repo.preload([:account,:category])
     else
       with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}-{D}") do
         Ecto.assoc(user, :bills)
         |> filter_by_month(date)
         |> Repo.all()
-        |> Repo.preload(:account)
+        |> Repo.preload([:account,:category])
       end
     end
   end
@@ -436,7 +436,7 @@ defmodule MyexpensesApiPhx.Data do
       bills = Ecto.assoc(user, :bills)
       |> filter_by_month(date)
       |> Repo.all()
-      |> Repo.preload(:account)
+      |> Repo.preload([:account,:category])
 
       Enum.filter(bills, fn(bill) -> Financial.bill_expense(user, bill, date) == nil end)
     end
@@ -458,7 +458,7 @@ defmodule MyexpensesApiPhx.Data do
   """
   def get_bill!(id) do
     Repo.get!(Bill, id)
-    |> Repo.preload(:account)
+    |> Repo.preload([:account,:category])
   end
 
   @doc """
@@ -500,9 +500,14 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def update_bill(%Bill{} = bill, attrs) do
-    bill
-    |> Bill.changeset(attrs)
-    |> Repo.update()
+    result = bill
+      |> Bill.changeset(attrs)
+      |> Repo.update()
+
+    case result do
+      {:ok, bill} -> {:ok, get_bill!(bill.id)}
+      _ -> result
+    end
   end
 
   @doc """
