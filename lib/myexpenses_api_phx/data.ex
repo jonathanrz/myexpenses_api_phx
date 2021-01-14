@@ -116,7 +116,9 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def list_categories(user) do
-    Repo.all(Ecto.assoc(user, :categories))
+    Ecto.assoc(user, :categories)
+    |> order_by(asc: :name)
+    |> Repo.all()
   end
 
   @doc """
@@ -213,7 +215,9 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def list_accounts(user) do
-    Repo.all(Ecto.assoc(user, :accounts))
+    Ecto.assoc(user, :accounts)
+    |> order_by(asc: :name)
+    |> Repo.all()
   end
 
   @doc """
@@ -310,7 +314,9 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def list_credit_cards(user) do
-    Repo.all(Ecto.assoc(user, :credit_cards))
+    Ecto.assoc(user, :credit_cards)
+    |> order_by(asc: :name)
+    |> Repo.all()
     |> Repo.preload(:account)
   end
 
@@ -419,12 +425,14 @@ defmodule MyexpensesApiPhx.Data do
   def list_bills(user, month) do
     if(is_nil(month)) do
       Ecto.assoc(user, :bills)
-        |> Repo.all()
-        |> Repo.preload([:account,:category])
+      |> order_by(asc: :name)
+      |> Repo.all()
+      |> Repo.preload([:account,:category])
     else
       with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}-{D}") do
         Ecto.assoc(user, :bills)
         |> filter_by_month(date)
+        |> order_by(asc: :name)
         |> Repo.all()
         |> Repo.preload([:account,:category])
       end
@@ -435,6 +443,7 @@ defmodule MyexpensesApiPhx.Data do
     with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
       bills = Ecto.assoc(user, :bills)
       |> filter_by_month(date)
+      |> order_by(asc: :name)
       |> Repo.all()
       |> Repo.preload([:account,:category])
 

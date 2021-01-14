@@ -26,6 +26,7 @@ defmodule MyexpensesApiPhx.Financial do
     Ecto.assoc(user, :receipts)
     |> filter_by_init_date(init_date)
     |> filter_by_end_date(end_date)
+    |> order_by(desc: :date)
     |> Repo.all()
     |> Repo.preload(:account)
   end
@@ -156,6 +157,7 @@ defmodule MyexpensesApiPhx.Financial do
     Ecto.assoc(user, :expenses)
     |> filter_by_init_date(init_date)
     |> filter_by_end_date(end_date)
+    |> order_by(desc: :date)
     |> Repo.all()
     |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
     |> Enum.map(fn expense ->
@@ -177,6 +179,7 @@ defmodule MyexpensesApiPhx.Financial do
       |> filter_by_init_date(Timex.beginning_of_month(date))
       |> filter_by_end_date(Timex.end_of_month(date))
       |> filter_by_only_with_account()
+      |> order_by(desc: :date)
       |> Repo.all()
       |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
 
@@ -208,7 +211,7 @@ defmodule MyexpensesApiPhx.Financial do
         }
       end)
 
-      Enum.concat(account_expenses, credit_card_bills)
+      Enum.concat(account_expenses, Enum.filter(credit_card_bills, fn(e) -> e.value > 0 end))
     end
   end
 
