@@ -190,7 +190,7 @@ defmodule MyexpensesApiPhx.Financial do
         credit_card_expenses = Ecto.assoc(user, :expenses)
         |> filter_by_init_date(Timex.beginning_of_month(credit_card_month))
         |> filter_by_end_date(Timex.end_of_month(credit_card_month))
-        |> filter_by_credit_card(credit_card)
+        |> filter_by_credit_card(credit_card.id)
         |> filter_by_unconfirmed()
         |> Repo.all()
 
@@ -212,6 +212,43 @@ defmodule MyexpensesApiPhx.Financial do
       end)
 
       Enum.concat(account_expenses, Enum.filter(credit_card_bills, fn(e) -> e.value > 0 end))
+    end
+  end
+
+  def generate_credit_card_invoice(user, month, credit_card_id) do
+    with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
+      credit_card_month = Timex.shift(date, months: -1)
+
+      credit_card = MyexpensesApiPhx.Data.get_credit_card!(credit_card_id)
+
+      credit_card_expenses = Ecto.assoc(user, :expenses)
+      |> filter_by_init_date(Timex.beginning_of_month(credit_card_month))
+      |> filter_by_end_date(Timex.end_of_month(credit_card_month))
+      |> filter_by_credit_card(credit_card_id)
+      |> filter_by_unconfirmed()
+      |> Repo.all()
+
+      Enum.each(credit_card_expenses, fn(expense) ->
+        changeset = Expense.changeset(expense, %{confirmed: true})
+        Repo.update(changeset)
+      end)
+      
+      result = user
+        |> Ecto.build_assoc(:expenses)
+        |> Expense.changeset(%{
+          name: "invoice #{credit_card.name}",
+          account_id: credit_card.account.id,
+          date: date,
+          value: credit_card_expenses
+          |> Enum.map(fn expense -> expense.value end)
+          |> Enum.sum(),
+        })
+        |> Repo.insert()
+
+      case result do
+        {:ok, expense} -> {:ok, get_expense!(expense.id)}
+        _ -> result
+      end
     end
   end
 
@@ -371,23 +408,33 @@ defmodule MyexpensesApiPhx.Financial do
   end
 
   def confirm_expense(expense) do
-    Multi.new()
-    |> Multi.update(
-      :account,
-      Account.changeset(expense.account, %{balance: expense.account.balance - expense.value})
-    )
-    |> Multi.update(:expense, Expense.changeset(expense, %{confirmed: true}))
-    |> Repo.transaction()
+    if(expense.account) do
+      Multi.new()
+      |> Multi.update(
+        :account,
+        Account.changeset(expense.account, %{balance: expense.account.balance - expense.value})
+      )
+      |> Multi.update(:expense, Expense.changeset(expense, %{confirmed: true}))
+      |> Repo.transaction()
+    else
+      changeset = Expense.changeset(expense, %{confirmed: true})
+      Repo.update(changeset)
+    end
   end
 
   def unconfirm_expense(expense) do
-    Multi.new()
-    |> Multi.update(
-      :account,
-      Account.changeset(expense.account, %{balance: expense.account.balance + expense.value})
-    )
-    |> Multi.update(:expense, Expense.changeset(expense, %{confirmed: false}))
-    |> Repo.transaction()
+    if(expense.account) do
+      Multi.new()
+      |> Multi.update(
+        :account,
+        Account.changeset(expense.account, %{balance: expense.account.balance + expense.value})
+      )
+      |> Multi.update(:expense, Expense.changeset(expense, %{confirmed: false}))
+      |> Repo.transaction()
+    else
+      changeset = Expense.changeset(expense, %{confirmed: false})
+      Repo.update(changeset)
+    end
   end
 
   defp filter_by_init_date(query, init_date) do
@@ -410,9 +457,9 @@ defmodule MyexpensesApiPhx.Financial do
       where: e.bill_id == ^bill.id
   end
 
-  defp filter_by_credit_card(query, credit_card) do
+  defp filter_by_credit_card(query, credit_card_id) do
     from e in query,
-      where: e.credit_card_id == ^credit_card.id
+      where: e.credit_card_id == ^credit_card_id
   end
 
   defp filter_by_unconfirmed(query) do

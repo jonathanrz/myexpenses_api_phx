@@ -23,6 +23,7 @@ defmodule MyexpensesApiPhxWeb.Router do
     resources "/credit_cards", CreditCardController
     resources "/categories", CategoryController
     get "/expenses/month", ExpenseController, :month
+    post "/expenses/generate_credit_card_invoice", ExpenseController, :generate_credit_card_invoice
     resources "/expenses", ExpenseController
     post "/expenses/:id/confirm", ExpenseController, :confirm
     post "/expenses/:id/unconfirm", ExpenseController, :unconfirm
