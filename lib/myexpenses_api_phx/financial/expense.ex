@@ -15,7 +15,8 @@ defmodule MyexpensesApiPhx.Financial.Expense do
              :bill,
              :category,
              :installmentNumber,
-             :installmentCount
+             :installmentCount,
+             :nubank_id
            ]}
 
   schema "expenses" do
@@ -25,6 +26,7 @@ defmodule MyexpensesApiPhx.Financial.Expense do
     field :installmentUUID, :string
     field :name, :string
     field :value, :integer
+    field :nubank_id, :string
 
     belongs_to(:account, MyexpensesApiPhx.Data.Account)
     belongs_to(:bill, MyexpensesApiPhx.Data.Bill)
@@ -50,7 +52,8 @@ defmodule MyexpensesApiPhx.Financial.Expense do
       :credit_card_id,
       :place_id,
       :bill_id,
-      :category_id
+      :category_id,
+      :nubank_id
     ])
     |> validate_required([:name, :date, :value])
     |> assoc_constraint(:account)

@@ -182,6 +182,9 @@ defmodule MyexpensesApiPhx.Financial do
       |> order_by(desc: :date)
       |> Repo.all()
       |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
+      |> Enum.map(fn expense ->
+        Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
+      end)
 
       credit_card_month = Timex.shift(date, months: -1)
 
