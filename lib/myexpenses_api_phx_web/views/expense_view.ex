@@ -11,11 +11,6 @@ defmodule MyexpensesApiPhxWeb.ExpenseView do
   end
 
   def render("expense.json", %{expense: expense}) do
-    installmentCount = 0
-    if(Map.has_key?(expense, :installmentCount)) do
-      installmentCount = expense.installmentCount
-    end
-
     %{
       id: expense.id,
       name: expense.name,
@@ -24,7 +19,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseView do
       value: expense.value,
       installmentUUID: expense.installmentUUID,
       installmentNumber: expense.installmentNumber,
-      installmentCount: installmentCount,
+      installmentCount: Map.get(expense, :installmentCount, 0),
       account: expense.account,
       credit_card: expense.credit_card,
       place: expense.place,

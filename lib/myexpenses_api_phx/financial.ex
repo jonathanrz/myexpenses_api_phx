@@ -165,6 +165,16 @@ defmodule MyexpensesApiPhx.Financial do
     end)
   end
 
+  def nubank_expenses(user) do
+    Ecto.assoc(user, :expenses)
+    |> filter_by_nubank()
+    |> Repo.all()
+    |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
+    |> Enum.map(fn expense ->
+      Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
+    end)
+  end
+
   def bill_expense(user, bill, date) do
     Ecto.assoc(user, :expenses)
       |> filter_by_init_date(Timex.beginning_of_month(date))
@@ -468,5 +478,9 @@ defmodule MyexpensesApiPhx.Financial do
   defp filter_by_unconfirmed(query) do
     from e in query,
       where: e.confirmed == false
+  end
+
+  defp filter_by_nubank(query) do
+    from e in query, where: not is_nil(e.nubank_id)
   end
 end
