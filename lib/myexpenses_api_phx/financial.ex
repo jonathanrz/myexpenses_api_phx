@@ -180,7 +180,7 @@ defmodule MyexpensesApiPhx.Financial do
       |> filter_by_init_date(Timex.beginning_of_month(date))
       |> filter_by_end_date(Timex.end_of_month(date))
       |> filter_by_bill(bill)
-      |> Repo.one()
+      |> Repo.aggregate(:count, :id)
   end
 
   def month_expenses(user, month) do

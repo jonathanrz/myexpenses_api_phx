@@ -447,7 +447,7 @@ defmodule MyexpensesApiPhx.Data do
       |> Repo.all()
       |> Repo.preload([:account,:category])
 
-      Enum.filter(bills, fn(bill) -> Financial.bill_expense(user, bill, date) == nil end)
+      Enum.filter(bills, fn(bill) -> Financial.bill_expense(user, bill, date) == 0 end)
     end
   end
 
