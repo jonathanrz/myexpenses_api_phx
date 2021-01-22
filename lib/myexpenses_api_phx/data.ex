@@ -19,7 +19,9 @@ defmodule MyexpensesApiPhx.Data do
 
   """
   def list_places(user) do
-    Repo.all(Ecto.assoc(user, :places))
+    Ecto.assoc(user, :places)
+    |> order_by(asc: :name)
+    |> Repo.all()
   end
 
   @doc """
