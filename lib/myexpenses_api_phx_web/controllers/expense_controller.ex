@@ -35,17 +35,17 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.expense_path(conn, :show, expense))
-      |> render("show.json", expense: Financial.get_expense!(expense.id))
+      |> render("show.json", expense: Financial.get_expense!(Guardian.Plug.current_resource(conn), expense.id))
     end
   end
 
   def show(conn, %{"id" => id}) do
-    expense = Financial.get_expense!(id)
+    expense = Financial.get_expense!(Guardian.Plug.current_resource(conn), id)
     render(conn, "show.json", expense: expense)
   end
 
   def update(conn, %{"id" => id, "expense" => expense_params}) do
-    expense = Financial.get_expense!(id)
+    expense = Financial.get_expense!(Guardian.Plug.current_resource(conn), id)
 
     with {:ok, %Expense{} = expense} <- Financial.update_expense(expense, expense_params) do
       render(conn, "show.json", expense: expense)
@@ -53,7 +53,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
   end
 
   def delete(conn, %{"id" => id}) do
-    expense = Financial.get_expense!(id)
+    expense = Financial.get_expense!(Guardian.Plug.current_resource(conn), id)
 
     with {:ok, %Expense{}} <- Financial.delete_expense(expense) do
       send_resp(conn, :no_content, "")
@@ -61,30 +61,30 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
   end
 
   def confirm(conn, %{"id" => id}) do
-    expense = Financial.get_expense!(id)
+    expense = Financial.get_expense!(Guardian.Plug.current_resource(conn), id)
 
     if(expense.confirmed == false) do
       {:ok, _expense} = Financial.confirm_expense(expense)
     end
 
-    render(conn, "show.json", expense: Financial.get_expense!(id))
+    render(conn, "show.json", expense: Financial.get_expense!(Guardian.Plug.current_resource(conn), id))
   end
 
   def unconfirm(conn, %{"id" => id}) do
-    expense = Financial.get_expense!(id)
+    expense = Financial.get_expense!(Guardian.Plug.current_resource(conn), id)
 
     if(expense.confirmed == true) do
       {:ok, _expense} = Financial.unconfirm_expense(expense)
     end
 
-    render(conn, "show.json", expense: Financial.get_expense!(id))
+    render(conn, "show.json", expense: Financial.get_expense!(Guardian.Plug.current_resource(conn), id))
   end
 
   def check_expense_owner(conn, _params) do
     %{params: %{"id" => id}} = conn
 
     try do
-      if Financial.get_expense!(id).user_id == Guardian.Plug.current_resource(conn).id do
+      if Financial.get_expense!(Guardian.Plug.current_resource(conn), id).user_id == Guardian.Plug.current_resource(conn).id do
         conn
       else
         conn

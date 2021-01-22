@@ -161,7 +161,7 @@ defmodule MyexpensesApiPhx.Financial do
     |> Repo.all()
     |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
     |> Enum.map(fn expense ->
-      Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
+      Map.put(expense, :installmentCount, load_installment_count(user, expense.installmentUUID))
     end)
   end
 
@@ -171,7 +171,7 @@ defmodule MyexpensesApiPhx.Financial do
     |> Repo.all()
     |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
     |> Enum.map(fn expense ->
-      Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
+      Map.put(expense, :installmentCount, load_installment_count(user, expense.installmentUUID))
     end)
   end
 
@@ -193,7 +193,7 @@ defmodule MyexpensesApiPhx.Financial do
       |> Repo.all()
       |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
       |> Enum.map(fn expense ->
-        Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
+        Map.put(expense, :installmentCount, load_installment_count(user, expense.installmentUUID))
       end)
 
       credit_card_month = Timex.shift(date, months: -1)
@@ -259,16 +259,18 @@ defmodule MyexpensesApiPhx.Financial do
         |> Repo.insert()
 
       case result do
-        {:ok, expense} -> {:ok, get_expense!(expense.id)}
+        {:ok, expense} -> {:ok, get_expense!(user, expense.id)}
         _ -> result
       end
     end
   end
 
-  defp load_installment_count(nil), do: 0
+  defp load_installment_count(_user, nil), do: 0
 
-  defp load_installment_count(installmentUUID) do
-    Repo.one(from e in "expenses", select: count(e.installmentUUID == ^installmentUUID))
+  defp load_installment_count(user, installmentUUID) do
+    Ecto.assoc(user, :expenses)
+    |> filter_by_installment_uuid(installmentUUID)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
@@ -285,13 +287,13 @@ defmodule MyexpensesApiPhx.Financial do
       ** (Ecto.NoResultsError)
 
   """
-  def get_expense!(id) do
+  def get_expense!(user, id) do
     expense =
       Repo.get!(Expense, id)
       |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
 
     if(expense.installmentUUID) do
-      Map.put(expense, :installmentCount, load_installment_count(expense.installmentUUID))
+      Map.put(expense, :installmentCount, load_installment_count(user, expense.installmentUUID))
     else
       expense
     end
@@ -367,7 +369,7 @@ defmodule MyexpensesApiPhx.Financial do
         |> Repo.insert()
 
       case result do
-        {:ok, expense} -> {:ok, get_expense!(expense.id)}
+        {:ok, expense} -> {:ok, get_expense!(user, expense.id)}
         _ -> result
       end
     end
@@ -482,5 +484,10 @@ defmodule MyexpensesApiPhx.Financial do
 
   defp filter_by_nubank(query) do
     from e in query, where: not is_nil(e.nubank_id)
+  end
+
+  defp filter_by_installment_uuid(query, installmentUUID) do
+    from e in query,
+      where: e.installmentUUID == ^installmentUUID
   end
 end
