@@ -4,7 +4,7 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
   alias MyexpensesApiPhx.Financial
   alias MyexpensesApiPhx.Financial.Expense
 
-  plug(:check_expense_owner when action not in [:index, :month, :nubank, :create, :generate_credit_card_invoice])
+  plug(:check_expense_owner when action not in [:index, :month, :nubank, :create, :get_credit_card_invoice, :generate_credit_card_invoice])
 
   action_fallback MyexpensesApiPhxWeb.FallbackController
 
@@ -20,6 +20,11 @@ defmodule MyexpensesApiPhxWeb.ExpenseController do
 
   def nubank(conn, _params) do
     expenses = Financial.nubank_expenses(Guardian.Plug.current_resource(conn))
+    render(conn, "index.json", expenses: expenses)
+  end
+
+  def get_credit_card_invoice(conn, %{"month" => month, "credit_card_id" => credit_card_id}) do
+    expenses = Financial.get_credit_card_invoice(Guardian.Plug.current_resource(conn), month, credit_card_id)
     render(conn, "index.json", expenses: expenses)
   end
 

@@ -24,6 +24,7 @@ defmodule MyexpensesApiPhxWeb.Router do
     resources "/categories", CategoryController
     get "/expenses/month", ExpenseController, :month
     get "/expenses/nubank", ExpenseController, :nubank
+    get "/expenses/get_credit_card_invoice", ExpenseController, :get_credit_card_invoice
     post "/expenses/generate_credit_card_invoice", ExpenseController, :generate_credit_card_invoice
     resources "/expenses", ExpenseController
     post "/expenses/:id/confirm", ExpenseController, :confirm

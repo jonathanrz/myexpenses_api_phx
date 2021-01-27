@@ -228,6 +228,25 @@ defmodule MyexpensesApiPhx.Financial do
     end
   end
 
+  def get_credit_card_invoice(user, month, credit_card_id) do
+    with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
+      credit_card_month = Timex.shift(date, months: -1)
+
+      credit_card = MyexpensesApiPhx.Data.get_credit_card!(credit_card_id)
+
+      Ecto.assoc(user, :expenses)
+      |> filter_by_init_date(Timex.beginning_of_month(credit_card_month))
+      |> filter_by_end_date(Timex.end_of_month(credit_card_month))
+      |> filter_by_credit_card(credit_card_id)
+      |> filter_by_unconfirmed()
+      |> Repo.all()
+      |> Repo.preload([:account, :place, :category, :user, credit_card: [:account], bill: [:account, :category]])
+      |> Enum.map(fn expense ->
+        Map.put(expense, :installmentCount, load_installment_count(user, expense.installmentUUID))
+      end)
+    end
+  end
+
   def generate_credit_card_invoice(user, month, credit_card_id) do
     with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
       credit_card_month = Timex.shift(date, months: -1)
