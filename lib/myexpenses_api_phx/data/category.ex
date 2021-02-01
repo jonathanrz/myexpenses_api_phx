@@ -2,7 +2,7 @@ defmodule MyexpensesApiPhx.Data.Category do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, only: [:id, :name]}
+  @derive {Jason.Encoder, only: [:id, :name, :forecast, :display_in_month_expense]}
 
   schema "categories" do
     field :name, :string
