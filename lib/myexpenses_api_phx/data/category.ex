@@ -16,7 +16,7 @@ defmodule MyexpensesApiPhx.Data.Category do
   @doc false
   def changeset(category, attrs) do
     category
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :forecast, :display_in_month_expense])
+    |> validate_required([:name, :forecast, :display_in_month_expense])
   end
 end
