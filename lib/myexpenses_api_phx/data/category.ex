@@ -6,6 +6,8 @@ defmodule MyexpensesApiPhx.Data.Category do
 
   schema "categories" do
     field :name, :string
+    field :forecast, :integer
+    field :display_in_month_expense, :boolean
     belongs_to(:user, MyexpensesApiPhx.AuthData.User)
 
     timestamps()

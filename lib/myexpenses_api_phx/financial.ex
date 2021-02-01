@@ -232,8 +232,6 @@ defmodule MyexpensesApiPhx.Financial do
     with {:ok, date} <- Timex.parse(month, "{YYYY}-{M}") do
       credit_card_month = Timex.shift(date, months: -1)
 
-      credit_card = MyexpensesApiPhx.Data.get_credit_card!(credit_card_id)
-
       Ecto.assoc(user, :expenses)
       |> filter_by_init_date(Timex.beginning_of_month(credit_card_month))
       |> filter_by_end_date(Timex.end_of_month(credit_card_month))
